@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":dependencyDashboardApproval",
+    ":enableVulnerabilityAlerts",
+    ":separateMultipleMajorReleases",
+    "customManagers:biomeVersions",
+    ":rebaseStalePrs",
+    ":timezone(Europe/Berlin)",
+    ":disableRateLimiting",
+    ":configMigration",
+    "replacements:all"
+  ],
+  "osvVulnerabilityAlerts": true,
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "@napi/cli",
+        "napi",
+        "napi-build",
+        "napi-derive"
+      ],
+      "addLabels": [
+        "napi-rs"
+      ],
+      "groupName": "napi-rs"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$/",
+        "/(^|/)action\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\s.*?:\\s\"(?<currentValue>.*)\"\\s"
+      ]
+    }
+  ],
+}
