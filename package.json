@@ -1,6 +1,6 @@
 {
   "name": "@craftlions/pdfium-rs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "My napi-rs addon",
   "main": "index.js",
@@ -30,8 +30,7 @@
     ]
   },
   "scripts": {
-    "prepublishOnly": "napi create-npm-dirs && napi artifacts -o . --npm-dir npm && napi prepublish --tag-style=npm --gh-release",
-    "build": "napi build --platform --release --esm",
+    "prepublishOnly": "napi prepublish -t npm",
     "test": "node test.mjs"
   },
   "files": [

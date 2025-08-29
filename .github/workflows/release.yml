@@ -20,6 +20,20 @@ jobs:
           - host: windows-2025
             target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.host }}
+    permissions:
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      id-token: write
+      issues: write
+      discussions: write
+      packages: write
+      pages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -44,9 +58,23 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      actions: write
+      checks: write
+      contents: write
+      deployments: write
+      id-token: write
+      issues: write
+      discussions: write
+      packages: write
+      pages: write
+      pull-requests: write
+      repository-projects: write
+      security-events: write
+      statuses: write
     steps:
       - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4.3.0
+        with:
+          fetch-depth: 0
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           pattern: nodes-*
@@ -61,9 +89,7 @@ jobs:
       - run: pnpm install
       - run: pnpm napi create-npm-dirs
       - run: pnpm napi artifacts -o .
-      - run: pnpm napi build --platform --release --esm
-      - run: pnpm napi prepublish -t npm --gh-release --gh-release-name "pdfium-rs ${GITHUB_REF_NAME}"
-
-      - run: pnpm publish --access public
+      - run: node scripts/binaries.mjs
+      - run: pnpm publish --access public --no-git-checks
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

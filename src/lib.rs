@@ -6,10 +6,8 @@ use std::io::Cursor;
 #[napi]
 pub fn pdf_to_png(bytes: Buffer) -> Result<Buffer> {
     let pdfium = Pdfium::new(
-        Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path(
-            "./pdfium-binaries",
-        ))
-        .expect("Could not load PDFium"),
+        Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
+            .expect("Could not load PDFium"),
     );
 
     let document = pdfium
