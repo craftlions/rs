@@ -1,6 +1,6 @@
 {
   "name": "@craftlions/pdfium-rs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "type": "module",
   "description": "My napi-rs addon",
   "main": "index.js",
@@ -31,6 +31,7 @@
   },
   "scripts": {
     "prepublishOnly": "napi prepublish -t npm --no-gh-release",
+    "gen": "trash target && PDFIUM_DYNAMIC_LIB_PATH=/Users/alexanderniebuhr/Developer/Projects/craftlions/pdfium/vendor/pdfium/darwin-arm64 pnpm napi build --platform --release --esm",
     "test": "node test.mjs"
   },
   "files": [

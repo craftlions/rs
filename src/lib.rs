@@ -5,10 +5,12 @@ use std::io::Cursor;
 
 #[napi]
 pub fn pdf_to_png(bytes: Buffer) -> Result<Buffer> {
-    let pdfium = Pdfium::new(
-        Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
-            .expect("Could not load PDFium"),
-    );
+    // let pdfium = Pdfium::new(
+    //     Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
+    //         .expect("Could not load PDFium"),
+    // );
+
+    let pdfium = Pdfium::new(Pdfium::bind_to_statically_linked_library().unwrap());
 
     let document = pdfium
         .load_pdf_from_byte_vec(bytes.to_vec(), None)
