@@ -1,6 +1,6 @@
 {
   "name": "@craftlions/pdfium-rs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "My napi-rs addon",
   "main": "index.js",
@@ -30,7 +30,7 @@
     ]
   },
   "scripts": {
-    "prepublishOnly": "napi prepublish -t npm",
+    "prepublishOnly": "napi prepublish -t npm --no-gh-release",
     "test": "node test.mjs"
   },
   "files": [
