@@ -2,15 +2,35 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use pdfium_render::prelude::*;
 use std::io::Cursor;
+use std::path::{Path, PathBuf};
+use url::Url;
+
+fn module_path_as_fs_path(env: &Env) -> Result<PathBuf> {
+    let s = env.get_module_file_name()?;
+    if s.starts_with("file://") {
+        let url = Url::parse(&s).map_err(|e| Error::from_reason(format!("bad file URL: {e}")))?;
+        url.to_file_path()
+            .map_err(|_| Error::from_reason("cannot convert file URL to path"))
+    } else {
+        Ok(PathBuf::from(s))
+    }
+}
 
 #[napi]
-pub fn pdf_to_png(bytes: Buffer) -> Result<Buffer> {
-    // let pdfium = Pdfium::new(
-    //     Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
-    //         .expect("Could not load PDFium"),
-    // );
+pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<Buffer> {
+    let module_path = module_path_as_fs_path(&env)?;
 
-    let pdfium = Pdfium::new(Pdfium::bind_to_statically_linked_library().unwrap());
+    let dir = Path::new(&module_path)
+        .parent()
+        .ok_or_else(|| Error::from_reason("Addon path has no parent"))?
+        .to_path_buf();
+
+    let path = Pdfium::pdfium_platform_library_name_at_path(&dir);
+
+    let pdfium = Pdfium::new(
+        Pdfium::bind_to_library(&path)
+            .map_err(|e| Error::from_reason(format!("Could not load PDFium: {e}")))?,
+    );
 
     let document = pdfium
         .load_pdf_from_byte_vec(bytes.to_vec(), None)

@@ -1,21 +1,17 @@
 [package]
 name = "pdfium"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = { version = "3.2.4", features = ["napi8"] }
+napi = { version = "3.2.4", features = ["napi10"] }
 napi-derive = "3.2.4"
-pdfium-render = { version = "0.8.35", features = [
-  "pdfium_latest",
-  "image_latest",
-  "thread_safe",
-  "static",
-] }
+pdfium-render = { version = "0.8.35" }
 image = "0.25.6"
+url = "2.5.7"
 
 [build-dependencies]
 napi-build = "2.2.3"
