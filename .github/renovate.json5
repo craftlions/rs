@@ -16,7 +16,7 @@
   "packageRules": [
     {
       "matchPackageNames": [
-        "@napi/cli",
+        "@napi-rs/cli",
         "napi",
         "napi-build",
         "napi-derive"
