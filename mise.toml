@@ -1,0 +1,10 @@
+[tools]
+"github:pnpm/pnpm" = "v11.0.0-alpha.16"
+"rust" = { version = "1.94.0", profile = "default" }
+
+[hooks]
+postinstall = "pnpm install"
+
+[settings]
+experimental = true
+idiomatic_version_file_enable_tools = ["node"]
