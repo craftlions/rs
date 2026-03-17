@@ -24,6 +24,7 @@ node scripts/update.ts
 ```zsh
 pnpm changeset
 ```
+> Uses upstream PDFium version [PDFium 148.0.7734.0](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F7734), which includes changes based on commits between `chromium/7725` and `chromium/7734`
 
 ```zsh
 git commit -m "update to PDFium 146.0.7678.0"
