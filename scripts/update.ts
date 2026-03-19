@@ -23,6 +23,8 @@ const platformFileNameMap = {
   "win32-x64-msvc": "pdfium.lib"
 }
 
+console.log("Updating PDFium binaries...");
+
 const baseUrl = "https://github.com/bblanchon/pdfium-binaries/releases/latest/download";
 
 for (const platform of ["darwin-arm64", "darwin-x64", "linux-x64-gnu", "win32-x64-msvc"] as const) {
