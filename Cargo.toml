@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 napi = { version = "3.2.4", features = ["napi10"] }
 napi-derive = "3.2.4"
-pdfium-render = { version = "0.8.35" }
+pdfium-render = { version = "0.9.0" }
 image = "0.25.6"
 url = "2.5.7"
 
