@@ -1,5 +1,11 @@
 # @craftlions/pdfium-rs
 
+## 0.0.15
+
+### Patch Changes
+
+- c51df5f: Handle PDF page image conversion errors before encoding rendered PNG output.
+
 ## 0.0.14
 
 ### Patch Changes
