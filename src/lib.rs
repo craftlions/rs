@@ -57,7 +57,8 @@ pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<Buffer> {
     let dyn_img = page
         .render_with_config(&render_config)
         .map_err(|e| Error::from_reason(format!("Render error: {:?}", e)))?
-        .as_image();
+        .as_image()
+        .map_err(|e| Error::from_reason(format!("Render image error: {:?}", e)))?;
 
     let mut buf = Vec::new();
     dyn_img
