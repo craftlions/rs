@@ -1,6 +1,6 @@
 [tools]
 "github:pnpm/pnpm" = "v11.5.0"
-"rust" = { version = "1.95.0", profile = "default" }
+"rust" = { version = "1.96.0", profile = "default" }
 
 [hooks]
 postinstall = "pnpm install"
