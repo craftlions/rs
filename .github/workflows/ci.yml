@@ -67,6 +67,7 @@ jobs:
       - run: mise run check-version
       - run: mise deps install pdfium
       - run: mise run test
+      - run: mise run sbom -- "$RUNNER_TEMP/sbom.cdx.json"
 
   dependencies:
     name: Dependency checks

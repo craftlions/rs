@@ -100,3 +100,9 @@ run = ["changeset version", "node scripts/sync-version.ts"]
 description = "Fail when Cargo.toml or index.js differ from the package.json version"
 hide = true
 run = "node scripts/sync-version.ts --check"
+
+[tasks.sbom]
+description = "Write the CycloneDX SBOM of the release: npm graph, platform packages, Rust crates and PDFium"
+depends = ["fetch"]
+usage = 'arg "[out]" default="sbom.cdx.json" help="Output path"'
+run = "node scripts/sbom.ts {{usage.out}}"

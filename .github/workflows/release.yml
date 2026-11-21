@@ -123,12 +123,13 @@ jobs:
       - run: mise run fetch
       # Adds libpdfium, LICENSE and the PDFium and Rust crate license notices to each platform package.
       - run: node scripts/prepare-packages.ts
+      # npm graph + platform packages + Rust crates + PDFium; generated before publishing so a failure stops the release.
+      - name: Generate SBOM
+        run: node scripts/sbom.ts sbom.cdx.json
       # prepublishOnly runs `napi prepublish`, which publishes the platform packages with npm (OIDC).
       - run: aube publish --no-git-checks --provenance
         env:
           NPM_CONFIG_PROVENANCE: true
-      - name: Generate SBOM
-        run: aube sbom --format cyclonedx > sbom.cdx.json
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom

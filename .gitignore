@@ -10,3 +10,4 @@ out.png
 
 # PDFium binaries, installed from pdfium.lock.json by `mise deps install pdfium`
 /vendor
+/sbom.cdx.json

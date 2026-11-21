@@ -165,6 +165,20 @@ Generate a random, seed-reproducible PDF (shapes, text, curves)
   **Default:** `200`
 - **`--seed <n>`** — PRNG seed; random when omitted
 
+## `sbom`
+
+Write the CycloneDX SBOM of the release: npm graph, platform packages, Rust crates and PDFium
+
+
+- Depends: fetch
+
+- **Usage:** `sbom [out]`
+
+### Arguments
+- **`[out]`** — Output path
+
+  **Default:** `sbom.cdx.json`
+
 ## `test`
 
 - Depends: build, local-pdfium
