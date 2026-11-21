@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/jdx/jactionlint/main/schema/jactionlint-config.json
+profile: pedantic
+
+rules:
+  # `jactionlint --fix` adds a 20 minute timeout to jobs that have none.
+  missing-timeout:
+    default-minutes: 20
+  timeout-too-long:
+    max: 45
+  # Warn when a pinned action release is younger than mise's and aube's 3-day release age.
+  action-release-cooldown:
+    days: 3
+  forbidden-uses:
+    allow:
+      - actions/*
+      - changesets/action
+      - jdx/*
+
+# Checks that branch protection requires; jactionlint fails when a workflow change would stop them reporting.
+required-checks:
+  - name: Lint and type-check
+    events: [pull_request]
+  - name: Dependency checks
+    events: [pull_request]
+
+online: true
+
+# Defaults for the manual `jactionlint update` (pin by SHA with a version comment).
+update:
+  freeze: true
+  cooldown-days: 3
+  exclude-prereleases: true
