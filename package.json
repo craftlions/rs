@@ -54,13 +54,5 @@
     "@napi-rs/cli": "3.10.12",
     "@types/node": "26.6.6",
     "typescript": "7.1.0-beta"
-  },
-  "packageManager": "aube@2.10.1",
-  "devEngines": {
-    "runtime": {
-      "name": "node",
-      "version": "26.13.1",
-      "onFail": "error"
-    }
   }
 }
