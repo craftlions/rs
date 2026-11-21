@@ -13,14 +13,14 @@ const platformUpstreamMap = {
   "darwin-arm64": "lib/libpdfium.dylib",
   "darwin-x64": "lib/libpdfium.dylib",
   "linux-x64-gnu": "lib/libpdfium.so",
-  "win32-x64-msvc": "lib/pdfium.dll.lib"
+  "win32-x64-msvc": "bin/pdfium.dll"
 }
 
 const platformFileNameMap = {
   "darwin-arm64": "libpdfium.dylib",
   "darwin-x64": "libpdfium.dylib",
   "linux-x64-gnu": "libpdfium.so",
-  "win32-x64-msvc": "pdfium.lib"
+  "win32-x64-msvc": "pdfium.dll"
 }
 
 // Pinned upstream release. Bump together with pdfium-render when a matching pdfium_XXXX feature exists.
@@ -35,6 +35,7 @@ for (const platform of ["darwin-arm64", "darwin-x64", "linux-x64-gnu", "win32-x6
     throw new Error(`Failed to download ${platformAssetMap[platform]}: ${file.status} ${file.statusText}`);
   }
   const arrayBuffer = await file.arrayBuffer();
+  await mkdir(`./vendor/pdfium/${platform}`, { recursive: true });
   await writeFile(`./vendor/pdfium/${platform}/${platformAssetMap[platform]}`, Buffer.from(arrayBuffer));
   await mkdir(`./vendor/pdfium/${platform}/upstream`, { recursive: true });
   const execFile = promisify(execFileRaw);
