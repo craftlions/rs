@@ -31,7 +31,7 @@ mise tasks          # list all tasks
 # RELEASE
 
 ```zsh
-mise run update-pdfium   # PDFium release is pinned in scripts/update.ts (PDFIUM_RELEASE)
+mise run update-pdfium   # PDFium release is pinned in mise-tasks/update-pdfium.ts (PDFIUM_RELEASE)
 ```
 
 ```zsh

@@ -1,5 +1,9 @@
-// Generates a random but reproducible PDF (shapes, text, curves) without dependencies.
-// Usage: node scripts/sample-pdf.mjs [--out sample.pdf] [--pages 3] [--seed 1234] [--shapes 200]
+#!/usr/bin/env node
+//MISE description="Generate a random, seed-reproducible PDF (shapes, text, curves)"
+//USAGE flag "--out <file>" default="sample.pdf" help="Output path"
+//USAGE flag "--pages <n>" default="3" help="Number of pages"
+//USAGE flag "--shapes <n>" default="200" help="Shapes per page"
+//USAGE flag "--seed <n>" help="PRNG seed; random when omitted"
 import { writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 

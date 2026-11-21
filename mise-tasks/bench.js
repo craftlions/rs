@@ -1,10 +1,15 @@
-// Benchmarks pdfToPng: cold start, sequential latency, concurrent throughput and event-loop blocking.
-// Usage: node bench.js [sample.pdf] [--iterations 50] [--concurrency 1,2,4,8] [--compression none,fast,balanced,best]
+#!/usr/bin/env node
+//MISE description="Benchmark pdfToPng (latency, throughput, event-loop blocking, compression)"
+//MISE depends=["build", "local-pdfium"]
+//USAGE arg "[pdf]" default="sample.pdf" help="PDF to render"
+//USAGE flag "--iterations <n>" default="50"
+//USAGE flag "--concurrency <list>" default="1,2,4,8"
+//USAGE flag "--compression <list>" default="none,fast,balanced,best"
 import { readFileSync } from "node:fs";
 import { availableParallelism } from "node:os";
 import { monitorEventLoopDelay, performance } from "node:perf_hooks";
 import { parseArgs } from "node:util";
-import { pdfToPng } from "./index.js";
+import { pdfToPng } from "../index.js";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,

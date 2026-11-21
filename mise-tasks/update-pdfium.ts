@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+//MISE description="Download the pinned PDFium binaries into vendor/pdfium (PDFIUM_RELEASE overrides the pin)"
 import { execFile as execFileRaw } from 'node:child_process';
 import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';

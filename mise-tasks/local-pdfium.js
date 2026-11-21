@@ -1,5 +1,6 @@
-// Copies the vendored PDFium library for the host platform next to the locally built addon,
-// mirroring the layout of the published platform packages.
+#!/usr/bin/env node
+//MISE description="Copy the vendored PDFium library for the host next to the local addon"
+//MISE hide=true
 import { copyFile, readdir } from "node:fs/promises";
 
 const platforms = {
