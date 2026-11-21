@@ -89,3 +89,38 @@ jobs:
       - run: aube publish --no-git-checks --provenance
         env:
           NPM_CONFIG_PROVENANCE: true
+      - name: Generate SBOM
+        run: aube sbom --format cyclonedx > sbom.cdx.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom
+          path: sbom.cdx.json
+          if-no-files-found: error
+
+  verify:
+    name: Verify publish trust evidence
+    needs: publish
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    cache-mode: none
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/setup
+        with:
+          cache: false
+      # Downstream aube/pnpm users reject versions whose trust evidence is weaker than earlier releases.
+      - name: aube trust check
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          for pkg in @craftlions/pdfium-rs @craftlions/pdfium-rs-darwin-arm64 @craftlions/pdfium-rs-darwin-x64 \
+            @craftlions/pdfium-rs-linux-x64-gnu @craftlions/pdfium-rs-win32-x64-msvc; do
+            for attempt in 1 2 3 4 5; do
+              if aube trust check "$pkg@$version"; then break; fi
+              if [ "$attempt" -eq 5 ]; then exit 1; fi
+              sleep 30
+            done
+          done
