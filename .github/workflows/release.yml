@@ -69,6 +69,8 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     cache-mode: none
+    # The npm trusted publisher is bound to this environment, so only runs it approves can publish.
+    environment: npm
     permissions:
       contents: read
       # npm trusted publishing (OIDC) and provenance
@@ -102,10 +104,10 @@ jobs:
 
   verify:
     name: Verify publish trust evidence
-    needs: publish
-    runs-on: ubuntu-26.04
     env:
       MISE_ENV: ci
+    needs: publish
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     cache-mode: none
     permissions:
