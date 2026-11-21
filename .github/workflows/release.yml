@@ -1,9 +1,11 @@
 name: Release
 
 on:
+  # Pushed by hand, or dispatched by changesets.yml with --ref vX.Y.Z after the release PR merges.
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
 
 permissions: {}
 
@@ -17,8 +19,34 @@ defaults:
     shell: bash
 
 jobs:
+  check:
+    name: Check release tag
+    env:
+      MISE_ENV: ci
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    cache-mode: none
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/setup
+        with:
+          cache: false
+      - name: Tag matches package.json and Cargo.toml
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "$GITHUB_REF" != "refs/tags/v$version" ]; then
+            echo "::error::Release must run on tag v$version, not $GITHUB_REF"
+            exit 1
+          fi
+          mise run check-version
+
   build:
     name: Build ${{ matrix.target }}
+    needs: check
     env:
       MISE_ENV: ci,release
     timeout-minutes: 45
@@ -133,3 +161,4 @@ jobs:
               sleep 30
             done
           done
+

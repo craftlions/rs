@@ -9,21 +9,43 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   version:
-    name: Version packages
+    name: Version packages or tag the release
     env:
       MISE_ENV: ci
     timeout-minutes: 15
     runs-on: ubuntu-26.04
     permissions:
-      contents: write # changesets/action commits the version bump to the release branch
+      contents: write # changesets/action commits the version bump and pushes the release tag
       pull-requests: write # changesets/action opens and updates the "Version Packages" PR
+      actions: write # dispatch release.yml, since tags pushed with GITHUB_TOKEN trigger no workflows
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: $/.github/actions/setup
         with:
           cache: false
-      - uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
+      # With pending changesets: open or update the "Version Packages" PR (mise run version also syncs Cargo.toml).
+      # Without (i.e. after that PR is merged): `changeset tag` tags the new version; existing tags are skipped.
+      - id: changesets
+        uses: changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
+          version-script: mise run version
+          publish-script: aube exec -- changeset tag
+          commit-message: "chore: release"
+          pr-title: "chore: release"
+          # release.yml creates the GitHub release once npm publishing is verified.
           create-github-releases: false
+          push-git-tags: true
+      - name: Start the release workflow
+        if: ${{ steps.changesets.outputs.published == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISHED: ${{ steps.changesets.outputs.published-packages }}
+        run: |
+          version="$(jq -r '.[0].version' <<<"$PUBLISHED")"
+          gh workflow run release.yml --repo "$GITHUB_REPOSITORY" --ref "v$version"
