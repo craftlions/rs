@@ -142,7 +142,7 @@ jobs:
       MISE_ENV: ci
     needs: publish
     runs-on: ubuntu-26.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     cache-mode: none
     permissions:
       contents: read
@@ -154,14 +154,18 @@ jobs:
         with:
           cache: false
       # Downstream aube/pnpm users reject versions whose trust evidence is weaker than earlier releases.
+      # New versions can take several minutes to appear in the npm packument (0.1.0: ~3 minutes), so retry
+      # for up to 10 minutes per package; packages that are already visible pass on the first attempt.
       - name: aube trust check
         run: |
           version="$(node -p 'require("./package.json").version')"
+          attempts=20
           for pkg in @craftlions/pdfium-rs @craftlions/pdfium-rs-darwin-arm64 @craftlions/pdfium-rs-darwin-x64 \
             @craftlions/pdfium-rs-linux-x64-gnu @craftlions/pdfium-rs-win32-x64-msvc; do
-            for attempt in 1 2 3 4 5; do
+            for attempt in $(seq "$attempts"); do
               if aube trust check "$pkg@$version"; then break; fi
-              if [ "$attempt" -eq 5 ]; then exit 1; fi
+              if [ "$attempt" -eq "$attempts" ]; then exit 1; fi
+              echo "::notice::$pkg@$version not verifiable yet (attempt $attempt/$attempts), retrying in 30s"
               sleep 30
             done
           done
