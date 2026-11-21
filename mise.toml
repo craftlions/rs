@@ -11,10 +11,6 @@ lockfile = true
 # Do not install tool versions published less than 3 days ago (supply-chain protection).
 minimum_release_age = "3d"
 
-[env]
-# Fail installs when a dependency has an unreviewed build script.
-AUBE_STRICT_DEP_BUILDS = "true"
-
 [hooks]
 postinstall = "aube install"
 

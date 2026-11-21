@@ -1,7 +1,17 @@
 # aube project policy (https://aube.sh/settings)
-# Dependency lifecycle scripts only run when listed here as `true`.
-# Review with `aube ignored-builds` / `aube approve-builds`.
+
+# Supply-chain hardening bundle: jailed + strict dependency builds, trustPolicy=no-downgrade,
+# strict minimum release age, strict store integrity and a required OSV advisory check.
+paranoid: true
+
+# Do not resolve npm versions published less than 3 days ago (4320 minutes), matching mise.
+minimumReleaseAge: 4320
+
+# Only the allowBuilds list below may run dependency lifecycle scripts; aube's built-in
+# trusted-dependencies list is ignored. Review with `aube ignored-builds` / `aube approve-builds`.
+useDefaultTrustedDependencies: false
 allowBuilds: {}
 
-# Run approved dependency build scripts inside aube's build jail.
-jailBuilds: true
+# Check against OSV on every install, also when node_modules is restored from a cache.
+advisoryBloomCheck: "on"
+advisoryCheckEveryInstall: true
