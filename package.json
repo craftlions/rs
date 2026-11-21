@@ -6,7 +6,7 @@
     "url": "https://github.com/craftlions/rs"
   },
   "type": "module",
-  "description": "My napi-rs addon",
+  "description": "Render the first page of a PDF to PNG in Node.js with PDFium, as a native Rust addon",
   "license": "MIT",
   "main": "index.js",
   "exports": {
