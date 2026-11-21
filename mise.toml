@@ -8,3 +8,6 @@ postinstall = "aube install"
 
 [settings]
 experimental = true
+lockfile = true
+# Do not install tool versions published less than 3 days ago (supply-chain protection).
+minimum_release_age = "3d"
