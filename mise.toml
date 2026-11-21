@@ -11,37 +11,64 @@ lockfile = true
 # Do not install tool versions published less than 3 days ago (supply-chain protection).
 minimum_release_age = "3d"
 
+[env]
+# Call napi, tsc and changeset directly in tasks.
+_.path = ["{{config_root}}/node_modules/.bin"]
+
 [hooks]
 postinstall = "aube install"
 
 [tasks.install]
 description = "Install Node.js dependencies from the lockfile"
+hide = true
 run = "aube install --frozen-lockfile"
 
 [tasks.build]
 description = "Build the native addon for the host platform"
+alias = "b"
 depends = ["install"]
 usage = 'arg "[target]" help="Rust target triple (defaults to host)"'
-run = "aube exec -- napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
+sources = [
+  "src/**/*.rs",
+  "Cargo.lock",
+  "Cargo.toml",
+  "build.rs",
+  "package.json",
+]
+outputs = ["pdfium.*.node"]
+run = "napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
 
 [tasks.test]
 description = "Run the node:test suite against sample.pdf"
+alias = "t"
 depends = ["build", "local-pdfium"]
-run = "aube test"
+deny_net = true
+run = "node --test test.js"
+
+[tasks.fetch]
+description = "Download Rust crates so sandboxed tasks can run offline"
+hide = true
+run = "cargo fetch --locked"
+
+[tasks.lint]
+description = "Run clippy with the Cargo.toml lint configuration (warnings are errors)"
+alias = "l"
+depends = ["fetch"]
+deny_net = true
+run = "cargo clippy --all-targets --locked --offline -- -D warnings"
 
 [tasks.typecheck]
 description = "Type-check TypeScript sources with tsc (TypeScript 7)"
+alias = "tc"
 depends = ["install"]
-run = "aube exec -- tsc --noEmit -p ."
-
-[tasks.lint]
-description = "Run clippy with the Cargo.toml lint configuration"
-run = "cargo clippy --all-targets -- -D warnings"
+deny_net = true
+run = "tsc --noEmit -p ."
 
 [tasks.changeset]
 description = "Add a changeset non-interactively (bump: patch|minor|major)"
+depends = ["install"]
 usage = '''
 arg "<bump>" help="Version bump" { choices "patch" "minor" "major" }
 arg "<summary>" help="Changelog summary"
 '''
-run = "aube exec -- changeset add --{{usage.bump}} @craftlions/pdfium-rs --message '{{usage.summary}}'"
+run = "changeset add --{{usage.bump}} @craftlions/pdfium-rs --message '{{usage.summary}}'"
