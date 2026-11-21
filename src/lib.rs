@@ -2,7 +2,8 @@ use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use pdfium_render::prelude::*;
 use std::io::Cursor;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 use url::Url;
 
 const RENDER_DPI: f32 = 144.0;
@@ -17,6 +18,25 @@ fn module_path_as_fs_path(env: Env) -> Result<PathBuf> {
     } else {
         Ok(PathBuf::from(s))
     }
+}
+
+/// PDFium can only be bound once per process, so the instance is shared by every call.
+static PDFIUM: OnceLock<Pdfium> = OnceLock::new();
+static PDFIUM_INIT: Mutex<()> = Mutex::new(());
+
+fn pdfium(library_path: &Path) -> Result<&'static Pdfium> {
+    if let Some(pdfium) = PDFIUM.get() {
+        return Ok(pdfium);
+    }
+    let _guard = PDFIUM_INIT
+        .lock()
+        .map_err(|_| Error::from_reason("PDFium initialization lock poisoned"))?;
+    if let Some(pdfium) = PDFIUM.get() {
+        return Ok(pdfium);
+    }
+    let bindings = Pdfium::bind_to_library(library_path)
+        .map_err(|e| Error::from_reason(format!("Could not load PDFium: {e}")))?;
+    Ok(PDFIUM.get_or_init(|| Pdfium::new(bindings)))
 }
 
 /// Renders the first page of a PDF to PNG at 144 DPI.
@@ -34,10 +54,7 @@ pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<Buffer> {
 
     let path = Pdfium::pdfium_platform_library_name_at_path(dir);
 
-    let pdfium = Pdfium::new(
-        Pdfium::bind_to_library(&path)
-            .map_err(|e| Error::from_reason(format!("Could not load PDFium: {e}")))?,
-    );
+    let pdfium = pdfium(&path)?;
 
     let document = pdfium
         .load_pdf_from_byte_vec(bytes.to_vec(), None)
