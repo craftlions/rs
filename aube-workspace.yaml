@@ -1,0 +1,7 @@
+# aube project policy (https://aube.sh/settings)
+# Dependency lifecycle scripts only run when listed here as `true`.
+# Review with `aube ignored-builds` / `aube approve-builds`.
+allowBuilds: {}
+
+# Run approved dependency build scripts inside aube's build jail.
+jailBuilds: true

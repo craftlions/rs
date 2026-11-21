@@ -1,9 +1,9 @@
 [tools]
-"github:pnpm/pnpm" = "v11.5.0"
+aube = "2.10.1"
 "rust" = { version = "1.100.0", profile = "default" }
 
 [hooks]
-postinstall = "pnpm install"
+postinstall = "aube install"
 
 [settings]
 experimental = true
