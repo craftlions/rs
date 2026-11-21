@@ -7,11 +7,11 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = { version = "3.2.4", features = ["napi10"] }
-napi-derive = "3.2.4"
+napi = { version = "3.16.2", features = ["napi10"] }
+napi-derive = "3.7.1"
 pdfium-render = { version = "0.9.0" }
-image = "0.25.6"
-url = "2.5.7"
+image = "0.25.10"
+url = "2.5.9"
 
 [build-dependencies]
-napi-build = "2.2.3"
+napi-build = "2.6.0"
