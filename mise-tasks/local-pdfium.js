@@ -15,7 +15,10 @@ if (!folder) {
   throw new Error(`No vendored PDFium for ${process.platform}-${process.arch}`);
 }
 
-for (const file of await readdir(`vendor/pdfium/${folder}`)) {
+// Only the shared library; licenses/ stays in vendor.
+for (const entry of await readdir(`vendor/pdfium/${folder}`, { withFileTypes: true })) {
+  if (!entry.isFile()) continue;
+  const file = entry.name;
   await copyFile(`vendor/pdfium/${folder}/${file}`, file);
   console.log(`copied vendor/pdfium/${folder}/${file} -> ./${file}`);
 }

@@ -3,7 +3,7 @@
 // Run through `mise deps install pdfium`; `mise run update-pdfium` changes the pin.
 import { execFile as execFileRaw } from "node:child_process";
 import { createHash } from "node:crypto";
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -77,6 +77,12 @@ export async function installPdfium(lock: PdfiumLock): Promise<void> {
       const target = `vendor/pdfium/${platform}`;
       await mkdir(target, { recursive: true });
       await copyFile(join(extractDir, library), `${target}/${library.split("/").pop()}`);
+      // License notices of PDFium and the libraries built into it; redistributing the binary requires them.
+      await mkdir(`${target}/licenses`, { recursive: true });
+      await copyFile(join(extractDir, "LICENSE"), `${target}/licenses/pdfium-binaries.txt`);
+      for (const file of await readdir(join(extractDir, "licenses"))) {
+        await copyFile(join(extractDir, "licenses", file), `${target}/licenses/${file}`);
+      }
       console.log(`  ${platform}: ${name} sha256 ok`);
     }
   } finally {
