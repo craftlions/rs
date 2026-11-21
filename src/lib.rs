@@ -39,25 +39,11 @@ fn pdfium(library_path: &Path) -> Result<&'static Pdfium> {
     Ok(PDFIUM.get_or_init(|| Pdfium::new(bindings)))
 }
 
-/// Renders the first page of a PDF to PNG at 144 DPI.
-///
-/// # Errors
-///
-/// Fails if PDFium cannot be loaded or the PDF cannot be rendered.
-#[napi]
-pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<Buffer> {
-    let module_path = module_path_as_fs_path(env)?;
-
-    let dir = module_path
-        .parent()
-        .ok_or_else(|| Error::from_reason("Addon path has no parent"))?;
-
-    let path = Pdfium::pdfium_platform_library_name_at_path(dir);
-
-    let pdfium = pdfium(&path)?;
+fn render_first_page_to_png(library_path: &Path, bytes: Vec<u8>) -> Result<Vec<u8>> {
+    let pdfium = pdfium(library_path)?;
 
     let document = pdfium
-        .load_pdf_from_byte_vec(bytes.to_vec(), None)
+        .load_pdf_from_byte_vec(bytes, None)
         .map_err(|e| Error::from_reason(format!("Failed to load PDF: {e:?}")))?;
 
     let page = document
@@ -85,5 +71,47 @@ pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<Buffer> {
         .write_to(&mut Cursor::new(&mut buf), image::ImageFormat::Png)
         .map_err(|e| Error::from_reason(format!("Image encode error: {e:?}")))?;
 
-    Ok(Buffer::from(buf))
+    Ok(buf)
+}
+
+/// Renders the first page of a PDF on the libuv thread pool.
+pub struct PdfToPng {
+    library_path: PathBuf,
+    bytes: Option<Vec<u8>>,
+}
+
+impl Task for PdfToPng {
+    type Output = Vec<u8>;
+    type JsValue = Buffer;
+
+    fn compute(&mut self) -> Result<Self::Output> {
+        let bytes = self
+            .bytes
+            .take()
+            .ok_or_else(|| Error::from_reason("PDF bytes were already consumed"))?;
+        render_first_page_to_png(&self.library_path, bytes)
+    }
+
+    fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
+        Ok(Buffer::from(output))
+    }
+}
+
+/// Renders the first page of a PDF to PNG at 144 DPI without blocking the JS thread.
+///
+/// # Errors
+///
+/// Fails if the addon path cannot be resolved; loading or rendering errors reject the returned promise.
+#[napi(ts_return_type = "Promise<Buffer>")]
+pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<AsyncTask<PdfToPng>> {
+    let module_path = module_path_as_fs_path(env)?;
+
+    let dir = module_path
+        .parent()
+        .ok_or_else(|| Error::from_reason("Addon path has no parent"))?;
+
+    Ok(AsyncTask::new(PdfToPng {
+        library_path: Pdfium::pdfium_platform_library_name_at_path(dir),
+        bytes: Some(bytes.to_vec()),
+    }))
 }

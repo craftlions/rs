@@ -10,10 +10,10 @@
 export declare const __napiBindingTarget: 'native' | 'wasm32-wasi' | 'wasm32-wasip1'
 
 /**
- * Renders the first page of a PDF to PNG at 144 DPI.
+ * Renders the first page of a PDF to PNG at 144 DPI without blocking the JS thread.
  *
  * # Errors
  *
- * Fails if PDFium cannot be loaded or the PDF cannot be rendered.
+ * Fails if the addon path cannot be resolved; loading or rendering errors reject the returned promise.
  */
-export declare function pdfToPng(bytes: Buffer): Buffer
+export declare function pdfToPng(bytes: Buffer): Promise<Buffer>
