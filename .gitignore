@@ -7,3 +7,6 @@ out.png
 /libpdfium.dylib
 /libpdfium.so
 /pdfium.dll
+
+# PDFium binaries, installed from pdfium.lock.json by `mise deps install pdfium`
+/vendor

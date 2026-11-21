@@ -122,9 +122,13 @@ Type-check TypeScript sources with tsc (TypeScript 7)
 
 ## `update-pdfium`
 
-- **Usage:** `update-pdfium`
+Pin a PDFium release in pdfium.lock.json and install it
 
-Download the pinned PDFium binaries into vendor/pdfium (PDFIUM_RELEASE overrides the pin)
+
+- **Usage:** `update-pdfium [release]`
+
+### Arguments
+- **`[release]`** — bblanchon/pdfium-binaries tag, e.g. chromium/8165 (defaults to the latest release)
 
 ## `version`
 

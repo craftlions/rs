@@ -87,6 +87,8 @@ jobs:
       - uses: $/.github/actions/setup
         with:
           cache: false
+      # Downloads the binaries pinned in pdfium.lock.json and fails on a checksum mismatch.
+      - run: mise deps install pdfium
       - run: aube exec -- napi create-npm-dirs
       - run: aube exec -- napi artifacts -o .
       - run: node scripts/binaries.mjs

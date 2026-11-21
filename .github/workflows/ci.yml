@@ -65,6 +65,7 @@ jobs:
       - run: mise run lint
       - run: mise run typecheck
       - run: mise run check-version
+      - run: mise deps install pdfium
       - run: mise run test
 
   dependencies:

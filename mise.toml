@@ -32,17 +32,18 @@ _.path = ["{{config_root}}/node_modules/.bin"]
 auto = true
 run = "aube install --frozen-lockfile"
 
-# Re-download PDFium only when the pinned release in the update task changes: `mise deps install pdfium`.
+# Download and checksum-verify the PDFium binaries pinned in pdfium.lock.json: `mise deps install pdfium`.
+# Change the pin with `mise run update-pdfium`.
 [deps.pdfium]
-description = "Vendored PDFium binaries"
-sources = ["mise-tasks/update-pdfium.ts"]
+description = "PDFium binaries pinned in pdfium.lock.json"
+sources = ["pdfium.lock.json", "scripts/install-pdfium.ts"]
 outputs = [
   "vendor/pdfium/darwin-arm64/libpdfium.dylib",
   "vendor/pdfium/darwin-x64/libpdfium.dylib",
   "vendor/pdfium/linux-x64-gnu/libpdfium.so",
   "vendor/pdfium/win32-x64-msvc/pdfium.dll",
 ]
-run = "node mise-tasks/update-pdfium.ts"
+run = "node scripts/install-pdfium.ts"
 
 [tasks.build]
 description = "Build the native addon for the host platform"

@@ -1,0 +1,22 @@
+{
+  "release": "chromium/8165",
+  "version": "160.0.8165.0",
+  "assets": {
+    "darwin-arm64": {
+      "name": "pdfium-mac-arm64.tgz",
+      "sha256": "112e74d717f3e0310273b70f3c8780e8a61ff11b34834124465c8305c841d350"
+    },
+    "darwin-x64": {
+      "name": "pdfium-mac-x64.tgz",
+      "sha256": "07285915b564e46a432a9909dbc1f15892885ca6489e3faeefc70dee77ed371a"
+    },
+    "linux-x64-gnu": {
+      "name": "pdfium-linux-x64.tgz",
+      "sha256": "ba7865e16c0271daab75256790be06c26272190afe6e2a70eae0bb39bb99089c"
+    },
+    "win32-x64-msvc": {
+      "name": "pdfium-win-x64.tgz",
+      "sha256": "ca7338ae7779b8b1b82f4580305c4d762d214f8df1d54b47647fe3cc75989ded"
+    }
+  }
+}
