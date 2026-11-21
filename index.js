@@ -773,6 +773,7 @@ if (
   }
 }
 
-const { pdfToPng } = nativeBinding
+const { pdfToPng, PngCompression } = nativeBinding
 export { pdfToPng }
+export { PngCompression }
 export const __napiBindingTarget = __napiLoadedBindingTarget

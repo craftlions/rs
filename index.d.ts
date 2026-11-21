@@ -10,10 +10,31 @@
 export declare const __napiBindingTarget: 'native' | 'wasm32-wasi' | 'wasm32-wasip1'
 
 /**
- * Renders the first page of a PDF to PNG at 144 DPI without blocking the JS thread.
+ * Renders the first page of a PDF to PNG (144 DPI, fast compression by default) without blocking the JS thread.
  *
  * # Errors
  *
- * Fails if the addon path cannot be resolved; loading or rendering errors reject the returned promise.
+ * Fails if the options are invalid or the addon path cannot be resolved; loading or rendering errors reject the
+ * returned promise.
  */
-export declare function pdfToPng(bytes: Buffer): Promise<Buffer>
+export declare function pdfToPng(bytes: Buffer, options?: PdfToPngOptions | undefined | null): Promise<Buffer>
+
+/** Options for `pdfToPng`. */
+export interface PdfToPngOptions {
+  /** PNG compression level. Defaults to `"fast"`. */
+  compression?: PngCompression
+  /** Render resolution in dots per inch (1–1200). Defaults to 144. */
+  dpi?: number
+}
+
+/** PNG compression level. Trades encoding time for output size; pixels are identical. */
+export declare const enum PngCompression {
+  /** No compression: fastest encoding, largest output. */
+  None = 'none',
+  /** Fast compression (the default). */
+  Fast = 'fast',
+  /** Balanced zlib level. */
+  Balanced = 'balanced',
+  /** Best compression: smallest output, slowest encoding. */
+  Best = 'best',
+}

@@ -1,12 +1,13 @@
+use image::codecs::png::{CompressionType, FilterType, PngEncoder};
 use napi::bindgen_prelude::*;
 use napi_derive::napi;
 use pdfium_render::prelude::*;
-use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 use url::Url;
 
-const RENDER_DPI: f32 = 144.0;
+const DEFAULT_DPI: f64 = 144.0;
+const MAX_DPI: f64 = 1200.0;
 const POINTS_PER_INCH: f32 = 72.0;
 
 fn module_path_as_fs_path(env: Env) -> Result<PathBuf> {
@@ -39,7 +40,71 @@ fn pdfium(library_path: &Path) -> Result<&'static Pdfium> {
     Ok(PDFIUM.get_or_init(|| Pdfium::new(bindings)))
 }
 
-fn render_first_page_to_png(library_path: &Path, bytes: Vec<u8>) -> Result<Vec<u8>> {
+/// PNG compression level. Trades encoding time for output size; pixels are identical.
+#[napi(string_enum = "lowercase")]
+#[derive(Default)]
+pub enum PngCompression {
+    /// No compression: fastest encoding, largest output.
+    None,
+    /// Fast compression (the default).
+    #[default]
+    Fast,
+    /// Balanced zlib level.
+    Balanced,
+    /// Best compression: smallest output, slowest encoding.
+    Best,
+}
+
+impl From<PngCompression> for CompressionType {
+    fn from(value: PngCompression) -> Self {
+        match value {
+            PngCompression::None => CompressionType::Uncompressed,
+            PngCompression::Fast => CompressionType::Fast,
+            PngCompression::Balanced => CompressionType::Default,
+            PngCompression::Best => CompressionType::Best,
+        }
+    }
+}
+
+/// Options for `pdfToPng`.
+#[napi(object)]
+#[derive(Default)]
+pub struct PdfToPngOptions {
+    /// PNG compression level. Defaults to `"fast"`.
+    pub compression: Option<PngCompression>,
+    /// Render resolution in dots per inch (1–1200). Defaults to 144.
+    pub dpi: Option<f64>,
+}
+
+struct RenderSettings {
+    compression: CompressionType,
+    dpi: f32,
+}
+
+impl TryFrom<Option<PdfToPngOptions>> for RenderSettings {
+    type Error = Error;
+
+    fn try_from(options: Option<PdfToPngOptions>) -> Result<Self> {
+        let options = options.unwrap_or_default();
+        let dpi = options.dpi.unwrap_or(DEFAULT_DPI);
+        if !dpi.is_finite() || !(1.0..=MAX_DPI).contains(&dpi) {
+            return Err(Error::new(
+                Status::InvalidArg,
+                format!("dpi must be between 1 and {MAX_DPI}, got {dpi}"),
+            ));
+        }
+        Ok(Self {
+            compression: options.compression.unwrap_or_default().into(),
+            dpi: dpi as f32,
+        })
+    }
+}
+
+fn render_first_page_to_png(
+    library_path: &Path,
+    bytes: Vec<u8>,
+    settings: &RenderSettings,
+) -> Result<Vec<u8>> {
     let pdfium = pdfium(library_path)?;
 
     let document = pdfium
@@ -52,8 +117,8 @@ fn render_first_page_to_png(library_path: &Path, bytes: Vec<u8>) -> Result<Vec<u
         .map_err(|e| Error::from_reason(format!("Failed to get first page: {e:?}")))?;
 
     let page_size = page.page_size();
-    let width_px = ((page_size.width().value / POINTS_PER_INCH) * RENDER_DPI).round() as i32;
-    let height_px = ((page_size.height().value / POINTS_PER_INCH) * RENDER_DPI).round() as i32;
+    let width_px = ((page_size.width().value / POINTS_PER_INCH) * settings.dpi).round() as i32;
+    let height_px = ((page_size.height().value / POINTS_PER_INCH) * settings.dpi).round() as i32;
 
     let render_config = PdfRenderConfig::new()
         .set_target_width(width_px)
@@ -67,8 +132,10 @@ fn render_first_page_to_png(library_path: &Path, bytes: Vec<u8>) -> Result<Vec<u
         .map_err(|e| Error::from_reason(format!("Render image error: {e:?}")))?;
 
     let mut buf = Vec::new();
+    let encoder =
+        PngEncoder::new_with_quality(&mut buf, settings.compression, FilterType::Adaptive);
     dyn_img
-        .write_to(&mut Cursor::new(&mut buf), image::ImageFormat::Png)
+        .write_with_encoder(encoder)
         .map_err(|e| Error::from_reason(format!("Image encode error: {e:?}")))?;
 
     Ok(buf)
@@ -78,6 +145,7 @@ fn render_first_page_to_png(library_path: &Path, bytes: Vec<u8>) -> Result<Vec<u
 pub struct PdfToPng {
     library_path: PathBuf,
     bytes: Option<Vec<u8>>,
+    settings: RenderSettings,
 }
 
 impl Task for PdfToPng {
@@ -89,7 +157,7 @@ impl Task for PdfToPng {
             .bytes
             .take()
             .ok_or_else(|| Error::from_reason("PDF bytes were already consumed"))?;
-        render_first_page_to_png(&self.library_path, bytes)
+        render_first_page_to_png(&self.library_path, bytes, &self.settings)
     }
 
     fn resolve(&mut self, _env: Env, output: Self::Output) -> Result<Self::JsValue> {
@@ -97,13 +165,19 @@ impl Task for PdfToPng {
     }
 }
 
-/// Renders the first page of a PDF to PNG at 144 DPI without blocking the JS thread.
+/// Renders the first page of a PDF to PNG (144 DPI, fast compression by default) without blocking the JS thread.
 ///
 /// # Errors
 ///
-/// Fails if the addon path cannot be resolved; loading or rendering errors reject the returned promise.
+/// Fails if the options are invalid or the addon path cannot be resolved; loading or rendering errors reject the
+/// returned promise.
 #[napi(ts_return_type = "Promise<Buffer>")]
-pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<AsyncTask<PdfToPng>> {
+pub fn pdf_to_png(
+    env: Env,
+    bytes: Buffer,
+    options: Option<PdfToPngOptions>,
+) -> Result<AsyncTask<PdfToPng>> {
+    let settings = RenderSettings::try_from(options)?;
     let module_path = module_path_as_fs_path(env)?;
 
     let dir = module_path
@@ -113,5 +187,6 @@ pub fn pdf_to_png(env: Env, bytes: Buffer) -> Result<AsyncTask<PdfToPng>> {
     Ok(AsyncTask::new(PdfToPng {
         library_path: Pdfium::pdfium_platform_library_name_at_path(dir),
         bytes: Some(bytes.to_vec()),
+        settings,
     }))
 }
