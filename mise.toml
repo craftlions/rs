@@ -1,13 +1,54 @@
 [tools]
 node = "26.13.1"
 aube = "2.10.1"
-"rust" = { version = "1.100.0", profile = "default" }
-
-[hooks]
-postinstall = "aube install"
+rust = { version = "1.100.0", profile = "default" }
 
 [settings]
 experimental = true
 lockfile = true
 # Do not install tool versions published less than 3 days ago (supply-chain protection).
 minimum_release_age = "3d"
+
+[env]
+# Fail installs when a dependency has an unreviewed build script.
+AUBE_STRICT_DEP_BUILDS = "true"
+
+[hooks]
+postinstall = "aube install"
+
+[tasks.install]
+description = "Install Node.js dependencies from the lockfile"
+run = "aube install --frozen-lockfile"
+
+[tasks.build]
+description = "Build the native addon for the host platform"
+depends = ["install"]
+usage = 'arg "[target]" help="Rust target triple (defaults to host)"'
+run = "aube exec -- napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
+
+[tasks.test]
+description = "Render the first page of sample.pdf to out.png"
+depends = ["build"]
+run = "aube test"
+
+[tasks.typecheck]
+description = "Type-check TypeScript sources with tsc (TypeScript 7)"
+depends = ["install"]
+run = "aube exec -- tsc --noEmit -p ."
+
+[tasks.lint]
+description = "Run clippy with the Cargo.toml lint configuration"
+run = "cargo clippy --all-targets -- -D warnings"
+
+[tasks.update-pdfium]
+description = "Download the pinned PDFium binaries into vendor/pdfium"
+depends = ["install"]
+run = "node scripts/update.ts"
+
+[tasks.changeset]
+description = "Add a changeset non-interactively (bump: patch|minor|major)"
+usage = '''
+arg "<bump>" help="Version bump" { choices "patch" "minor" "major" }
+arg "<summary>" help="Changelog summary"
+'''
+run = "aube exec -- changeset add --{{usage.bump}} @craftlions/pdfium-rs --message '{{usage.summary}}'"
