@@ -1,30 +1,91 @@
-<!-- Node.js bindings ❤️ Rust crates -->
+# @craftlions/pdfium-rs
 
-# @craftlions/rs
+[![npm version](https://img.shields.io/npm/v/@craftlions/pdfium-rs.svg)](https://www.npmjs.com/package/@craftlions/pdfium-rs)
+[![npm downloads](https://img.shields.io/npm/dm/@craftlions/pdfium-rs.svg?sanitize=true)](https://www.npmjs.com/package/@craftlions/pdfium-rs)
 
-When `Node.js meet Rust` = 🚀
+Native Node.js addon built with [napi-rs](https://napi.rs/) and [`pdfium-render`](https://crates.io/crates/pdfium-render) that renders the first page of a PDF to PNG using PDFium.
 
-# napi-rs
+- Runs asynchronously on the libuv thread pool without blocking the JavaScript event loop
+- Bundles prebuilt PDFium libraries in platform-specific packages—no system PDFium installation or Rust toolchain required
+- Reuses a single per-process PDFium instance safely across concurrent calls
+- Ships ESM bindings with generated TypeScript declarations
 
-Make rust crates binding to Node.js use [napi-rs](https://github.com/napi-rs/napi-rs)
+## Install
 
-# Packages
-
-| Package                                            | Version                                                     | Downloads                                                                  | Description                                                                |
-| -------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [`@craftlions/pdfium-rs`](./)               | ![](https://img.shields.io/npm/v/@craftlions/pdfium-rs.svg)        | ![](https://img.shields.io/npm/dm/@craftlions/pdfium-rs.svg?sanitize=true)        | `pdfium` |
-| [`@craftlions/oxipng-rs`](./)               | ![](https://img.shields.io/npm/v/@craftlions/oxipng-rs.svg)        | ![](https://img.shields.io/npm/dm/@craftlions/oxipng-rs.svg?sanitize=true)        | `oxipng` |
-
-# DEVELOPMENT
-
-Tools (Node.js, Rust, aube, jactionlint, shellcheck) are pinned in `mise.toml` and locked in `mise.lock`.
-mise installs Node.js dependencies automatically before `mise run` / `mise exec` (`[deps.aube]`).
-
-```zsh
-mise install        # install the toolchain
-mise run test       # build the addon and run the test suite
-mise tasks          # list all tasks
+```sh
+npm install @craftlions/pdfium-rs
 ```
+
+The matching prebuilt native addon and PDFium shared library are installed automatically as an optional dependency.
+
+## Usage
+
+```js
+import { readFile, writeFile } from "node:fs/promises";
+import { pdfToPng } from "@craftlions/pdfium-rs";
+
+const pdf = await readFile("document.pdf");
+const png = await pdfToPng(pdf, {
+  dpi: 144,
+  compression: "fast",
+});
+
+await writeFile("page-1.png", png);
+```
+
+### `pdfToPng(bytes, options?)`
+
+Renders the first page of a PDF `Buffer` and resolves to a PNG `Buffer`. Landscape pages are rotated 90° during rendering. Invalid options fail immediately; PDF loading or rendering errors reject the returned promise.
+
+**Parameters**
+
+- `bytes: Buffer` — Raw PDF bytes.
+- `options?: PdfToPngOptions | null` — Optional render and encoding settings:
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dpi` | `number` | `144` | Render resolution in dots per inch (`1`–`1200`). |
+| `compression` | `"none" \| "fast" \| "balanced" \| "best"` | `"fast"` | PNG compression level (`PngCompression`). Trades encoding time for output size; pixels are identical. |
+
+Compression levels:
+
+- `"none"` — No compression; fastest encoding, largest output.
+- `"fast"` — Fast compression (default).
+- `"balanced"` — Balanced zlib compression level.
+- `"best"` — Best compression; smallest output, slowest encoding.
+
+## Supported platforms
+
+Prebuilt binaries (native `.node` addon + checksum-verified PDFium shared library) are published for:
+
+| OS | Architecture | Target triple | Package |
+| --- | --- | --- | --- |
+| macOS | Apple Silicon (`arm64`) | `aarch64-apple-darwin` | `@craftlions/pdfium-rs-darwin-arm64` |
+| macOS | Intel (`x64`) | `x86_64-apple-darwin` | `@craftlions/pdfium-rs-darwin-x64` |
+| Linux (glibc) | `x64` | `x86_64-unknown-linux-gnu` | `@craftlions/pdfium-rs-linux-x64-gnu` |
+| Windows (MSVC) | `x64` | `x86_64-pc-windows-msvc` | `@craftlions/pdfium-rs-win32-x64-msvc` |
+
+## Development
+
+The toolchain (Node.js, Rust, `aube`, and on Linux/macOS `jactionlint` and `shellcheck`) is pinned in `mise.toml` and locked in `mise.lock`. `mise` installs Node.js dependencies automatically before `mise run` / `mise exec` via `[deps.aube]`.
+
+```sh
+mise install               # install the pinned toolchain
+mise deps install pdfium   # download and checksum-verify the PDFium binaries pinned in pdfium.lock.json
+mise run test              # build the native addon, stage local PDFium, and run the test suite
+```
+
+Common checks and utilities:
+
+```sh
+mise run lint              # run clippy (warnings are errors)
+mise run typecheck         # type-check TypeScript sources with tsc
+mise run bench             # benchmark latency, throughput, event-loop blocking, and compression
+mise run update-pdfium     # pin a newer PDFium release in pdfium.lock.json and draft a changeset
+mise tasks                 # list all tasks
+```
+
+Available `mise` tasks (generated by `mise generate task-docs`):
 
 <!-- mise-tasks -->
 ## `bench`
@@ -140,34 +201,12 @@ Pin a PDFium release in pdfium.lock.json, install it and draft a changeset with 
 Apply changesets: bump package.json, write CHANGELOG.md and sync the Cargo.toml version
 <!-- /mise-tasks -->
 
-# RELEASE
+## Release
 
-```zsh
-mise deps install pdfium   # PDFium release is pinned in mise-tasks/update-pdfium.ts (PDFIUM_RELEASE)
-```
+Releases are automated with [Changesets](https://github.com/changesets/changesets) and GitHub Actions (`.github/workflows/changesets.yml` and `.github/workflows/release.yml`):
 
-```zsh
-mise run changeset patch "Uses upstream PDFium version ..."
-```
-
-> Uses upstream PDFium version [PDFium 160.0.8165.0](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F8165), which includes changes based on commits between `chromium/7834` and `chromium/8165`
-
-```zsh
-git commit -m "update to PDFium 160.0.8165.0"
-```
-
-```zsh
-mise exec -- changeset version
-```
-
-```zsh
-git commit -m "release v0.0.9"
-```
-
-```zsh
-git tag v0.0.9
-```
-
-```zsh
-git push origin main --tags
-```
+1. **Add a changeset** — Run `mise run changeset <patch|minor|major> "<summary>"` (or `mise run update-pdfium` when updating PDFium) and merge the change to `main`.
+2. **Version PR** — On push to `main`, `changesets.yml` runs `mise run version` (bumping `package.json`, updating `CHANGELOG.md`, and syncing `Cargo.toml`) and opens or updates the `chore: release` pull request.
+3. **Automatic tagging** — Merging the `chore: release` PR triggers `changesets.yml` again, which runs `changeset tag`, pushes the `v<version>` tag, and dispatches `release.yml` for that tag.
+4. **Build and npm approval** — `release.yml` verifies that the tag matches `package.json` and `Cargo.toml`, builds the native addon for all four targets without restoring caches, and pauses at the `npm` environment for approval. Once approved, it downloads the pinned PDFium binaries, publishes the main and platform packages to npm via OIDC trusted publishing with provenance, and generates a CycloneDX SBOM (`sbom.cdx.json`).
+5. **Verification and GitHub release** — After publishing, `release.yml` checks npm trust evidence for every published package (`aube trust check`) and creates the GitHub release `v<version>` from the matching `CHANGELOG.md` section with `sbom.cdx.json` attached.
