@@ -25,7 +25,10 @@ jobs:
       pull-requests: write # changesets/action opens and updates the "Version Packages" PR
       actions: write # dispatch release.yml, since tags pushed with GITHUB_TOKEN trigger no workflows
     steps:
+      # changesets/action commits and tags through the GitHub API, so git needs no stored token while dev tools run.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: $/.github/actions/setup
         with:
           cache: false
