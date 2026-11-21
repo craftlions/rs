@@ -1,5 +1,15 @@
 # @craftlions/pdfium-rs
 
+## 0.1.1
+
+### Patch Changes
+
+- 378cbf8: Fix the binding version check in `index.js`, which expected 0.0.15 in 0.1.0 and failed to load with `NAPI_RS_ENFORCE_VERSION_CHECK` set.
+- 132a20c: License the package under MIT. It previously had no license, so it could not legally be used.
+- 9b0c971: Replace the placeholder npm description ("My napi-rs addon") of the main and platform packages.
+- 57bc731: Stop bundling every platform's addon and PDFium library (~47 MB) in the main package; installs now download only the platform package they need.
+- eb05dc8: Ship the license notices of PDFium, the libraries built into it and the Rust crates linked into the addon in every platform package (`LICENSE`, `THIRD_PARTY_NOTICES.md`, `licenses/pdfium/`).
+
 ## 0.1.0
 
 ### Minor Changes
