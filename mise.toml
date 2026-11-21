@@ -1,15 +1,27 @@
+min_version = "2026.11.9"
+
 [tools]
 node = "26.13.1"
 aube = "2.10.1"
 rust = { version = "1.100.0", profile = "default" }
-jactionlint = "2.6.0"
-shellcheck = "0.11.0"
+# Workflow linting only; not needed on the Windows release runner.
+jactionlint = { version = "2.6.0", os = ["linux", "macos"] }
+shellcheck = { version = "0.11.0", os = ["linux", "macos"] }
 
 [settings]
 experimental = true
 lockfile = true
+# Install exactly the versions and download URLs recorded in mise.lock.
+locked = true
+lockfile_platforms = ["macos-arm64", "macos-x64", "linux-x64", "windows-x64"]
 # Do not install tool versions published less than 3 days ago (supply-chain protection).
 minimum_release_age = "3d"
+
+[settings.skills]
+# Link agent skills shipped by tools (e.g. aube) into .agents/skills and .claude/skills.
+auto_sync = true
+dir = ".agents/skills"
+prune = true
 
 [env]
 # Call napi, tsc and changeset directly in tasks.
