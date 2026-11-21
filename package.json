@@ -36,7 +36,7 @@
   },
   "scripts": {
     "prepublishOnly": "napi prepublish -t npm --no-gh-release",
-    "test": "node test.js",
+    "test": "node --test test.js",
     "typecheck": "tsc --noEmit -p .",
     "changeset:patch": "changeset add --patch @craftlions/pdfium-rs",
     "changeset:minor": "changeset add --minor @craftlions/pdfium-rs",

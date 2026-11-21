@@ -28,9 +28,23 @@ depends = ["install"]
 usage = 'arg "[target]" help="Rust target triple (defaults to host)"'
 run = "aube exec -- napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
 
+[tasks.local-pdfium]
+description = "Copy the vendored PDFium library for the host next to the local addon"
+run = "node scripts/local-pdfium.mjs"
+
+[tasks.sample]
+description = "Generate a random PDF (pass --seed N for a reproducible one)"
+usage = '''
+flag "--out <file>" default="sample.pdf"
+flag "--pages <n>" default="3"
+flag "--shapes <n>" default="200"
+flag "--seed <n>"
+'''
+run = "node scripts/sample-pdf.mjs --out {{usage.out}} --pages {{usage.pages}} --shapes {{usage.shapes}} {% if usage.seed %}--seed {{usage.seed}}{% endif %}"
+
 [tasks.test]
-description = "Render the first page of sample.pdf to out.png"
-depends = ["build"]
+description = "Run the node:test suite against sample.pdf"
+depends = ["build", "local-pdfium"]
 run = "aube test"
 
 [tasks.typecheck]
