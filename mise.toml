@@ -15,18 +15,26 @@ minimum_release_age = "3d"
 # Call napi, tsc and changeset directly in tasks.
 _.path = ["{{config_root}}/node_modules/.bin"]
 
-[hooks]
-postinstall = "aube install"
-
-[tasks.install]
-description = "Install Node.js dependencies from the lockfile"
-hide = true
+# Install Node.js dependencies before `mise run` / `mise exec` when package.json or aube-lock.yaml changed.
+[deps.aube]
+auto = true
 run = "aube install --frozen-lockfile"
+
+# Re-download PDFium only when the pinned release in the update task changes: `mise deps install pdfium`.
+[deps.pdfium]
+description = "Vendored PDFium binaries"
+sources = ["mise-tasks/update-pdfium.ts"]
+outputs = [
+  "vendor/pdfium/darwin-arm64/libpdfium.dylib",
+  "vendor/pdfium/darwin-x64/libpdfium.dylib",
+  "vendor/pdfium/linux-x64-gnu/libpdfium.so",
+  "vendor/pdfium/win32-x64-msvc/pdfium.dll",
+]
+run = "node mise-tasks/update-pdfium.ts"
 
 [tasks.build]
 description = "Build the native addon for the host platform"
 alias = "b"
-depends = ["install"]
 usage = 'arg "[target]" help="Rust target triple (defaults to host)"'
 sources = [
   "src/**/*.rs",
@@ -60,13 +68,11 @@ run = "cargo clippy --all-targets --locked --offline -- -D warnings"
 [tasks.typecheck]
 description = "Type-check TypeScript sources with tsc (TypeScript 7)"
 alias = "tc"
-depends = ["install"]
 deny_net = true
 run = "tsc --noEmit -p ."
 
 [tasks.changeset]
 description = "Add a changeset non-interactively (bump: patch|minor|major)"
-depends = ["install"]
 usage = '''
 arg "<bump>" help="Version bump" { choices "patch" "minor" "major" }
 arg "<summary>" help="Changelog summary"
