@@ -1,0 +1,30 @@
+name: Setup
+description: Install the mise toolchain (node, rust, aube) and Node.js dependencies with aube. Callers own any node_modules cache.
+
+inputs:
+  rust-target:
+    description: Additional Rust target to install with rustup
+    required: false
+    default: ""
+  cache:
+    description: Restore and save the mise tool cache. Set to "false" in release jobs to avoid cache poisoning.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    # Installs the tools pinned in mise.toml; mise.lock triggers `mise install --locked`.
+    - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
+      with:
+        cache: ${{ inputs.cache }}
+        minimum_release_age: 3d
+
+    - if: ${{ inputs.rust-target != '' }}
+      shell: bash
+      env:
+        RUST_TARGET: ${{ inputs.rust-target }}
+      run: rustup target add "$RUST_TARGET"
+
+    - shell: bash
+      run: aube install --frozen-lockfile
