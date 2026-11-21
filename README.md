@@ -198,7 +198,7 @@ Pin a PDFium release in pdfium.lock.json, install it and draft a changeset with 
 
 - **Usage:** `version`
 
-Apply changesets: bump package.json, write CHANGELOG.md and sync the Cargo.toml version
+Apply changesets: bump package.json, write CHANGELOG.md and sync the version into Cargo.toml and index.js
 <!-- /mise-tasks -->
 
 ## Release
