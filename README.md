@@ -125,6 +125,12 @@ Type-check TypeScript sources with tsc (TypeScript 7)
 - **Usage:** `update-pdfium`
 
 Download the pinned PDFium binaries into vendor/pdfium (PDFIUM_RELEASE overrides the pin)
+
+## `version`
+
+- **Usage:** `version`
+
+Apply changesets: bump package.json, write CHANGELOG.md and sync the Cargo.toml version
 <!-- /mise-tasks -->
 
 # RELEASE

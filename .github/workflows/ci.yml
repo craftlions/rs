@@ -64,6 +64,7 @@ jobs:
       - run: cargo fmt --check
       - run: mise run lint
       - run: mise run typecheck
+      - run: mise run check-version
       - run: mise run test
 
   dependencies:

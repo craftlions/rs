@@ -90,3 +90,12 @@ arg "<bump>" help="Version bump" { choices "patch" "minor" "major" }
 arg "<summary>" help="Changelog summary"
 '''
 run = "changeset add --{{usage.bump}} @craftlions/pdfium-rs --message '{{usage.summary}}'"
+
+[tasks.version]
+description = "Apply changesets: bump package.json, write CHANGELOG.md and sync the Cargo.toml version"
+run = ["changeset version", "node scripts/sync-cargo-version.ts"]
+
+[tasks.check-version]
+description = "Fail when Cargo.toml and package.json versions differ"
+hide = true
+run = "node scripts/sync-cargo-version.ts --check"
