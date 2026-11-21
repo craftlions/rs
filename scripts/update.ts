@@ -23,9 +23,11 @@ const platformFileNameMap = {
   "win32-x64-msvc": "pdfium.lib"
 }
 
-console.log("Updating PDFium binaries...");
+// Pinned upstream release. Bump together with pdfium-render when a matching pdfium_XXXX feature exists.
+const PDFIUM_RELEASE = process.env.PDFIUM_RELEASE ?? "chromium/8165";
+const baseUrl = `https://github.com/bblanchon/pdfium-binaries/releases/download/${encodeURIComponent(PDFIUM_RELEASE)}`;
 
-const baseUrl = "https://github.com/bblanchon/pdfium-binaries/releases/latest/download";
+console.log(`Updating PDFium binaries to ${PDFIUM_RELEASE}...`);
 
 for (const platform of ["darwin-arm64", "darwin-x64", "linux-x64-gnu", "win32-x64-msvc"] as const) {
   const file = await fetch(`${baseUrl}/${platformAssetMap[platform]}`);
