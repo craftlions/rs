@@ -37,3 +37,29 @@ jobs:
       - run: cargo fmt --check
       - run: mise run lint
       - run: mise run typecheck
+
+  dependencies:
+    name: Dependency checks
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: aube-nm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.lock', 'aube-lock.yaml', 'aube-workspace.yaml', 'package.json') }}
+      - uses: $/.github/actions/setup
+      - name: Audit advisories
+        run: aube audit --audit-level high
+      - name: Fail on deprecated dependencies
+        run: aube deprecations --exit-code
+      - name: Outdated dependencies (report only)
+        run: aube outdated --long || true
+      - name: Licenses
+        run: aube licenses
+      - name: Check package contents
+        run: aube pack --dry-run --json --ignore-scripts
