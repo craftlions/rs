@@ -42,7 +42,24 @@ jobs:
       - uses: $/.github/actions/setup
         with:
           cache: false
-      - run: jactionlint
+      - id: jactionlint-bin
+        run: echo "path=$(mise which jactionlint)" >> "$GITHUB_OUTPUT"
+      # Online check answers are cached between runs; GitHub cache keys are immutable, hence the run ID.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/jactionlint
+          key: jactionlint-online-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: jactionlint-online-
+      - uses: jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e # v2.6.0
+        with:
+          executable: ${{ steps.jactionlint-bin.outputs.path }}
+          online: true
+          strict-exit: true
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: ${{ !cancelled() }}
+        with:
+          path: ~/.cache/jactionlint
+          key: jactionlint-online-${{ github.run_id }}-${{ github.run_attempt }}
       - run: mise fmt --check
       - run: cargo fmt --check
       - run: mise run lint
@@ -51,6 +68,8 @@ jobs:
 
   dependencies:
     name: Dependency checks
+    env:
+      MISE_ENV: ci
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
@@ -68,8 +87,6 @@ jobs:
         run: aube audit --audit-level high
       - name: Fail on deprecated dependencies
         run: aube deprecations --exit-code
-    env:
-      MISE_ENV: ci
       - name: Outdated dependencies (report only)
         run: aube outdated --long || true
       - name: Licenses
