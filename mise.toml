@@ -56,7 +56,7 @@ sources = [
   "build.rs",
   "package.json",
 ]
-outputs = ["pdfium.*.node"]
+outputs = ["pdfium.*.node", "index.js", "index.d.ts"]
 run = "napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
 
 [tasks.test]
@@ -93,11 +93,11 @@ arg "<summary>" help="Changelog summary"
 run = "changeset add --{{usage.bump}} @craftlions/pdfium-rs --message '{{usage.summary}}'"
 
 [tasks.version]
-description = "Apply changesets: bump package.json, write CHANGELOG.md and sync the version into Cargo.toml and index.js"
+description = "Apply changesets: bump package.json, write CHANGELOG.md and sync the Cargo.toml version"
 run = ["changeset version", "node scripts/sync-version.ts"]
 
 [tasks.check-version]
-description = "Fail when Cargo.toml or index.js differ from the package.json version"
+description = "Fail when Cargo.toml and package.json versions differ"
 hide = true
 run = "node scripts/sync-version.ts --check"
 

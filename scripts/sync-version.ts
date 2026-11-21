@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-// Copies the package.json version into Cargo.toml, Cargo.lock and the napi-generated index.js.
-// `--check` only reports a mismatch.
+// Copies the package.json version into Cargo.toml and Cargo.lock. `--check` only reports a mismatch.
 import { readFile, writeFile } from "node:fs/promises";
 
 const check = process.argv.includes("--check");
@@ -15,13 +14,11 @@ const files = {
   "Cargo.toml": [cargoToml, /(^\[package\][^[]*?^version = ")[^"]+(")/m],
   // The [[package]] entry of this crate.
   "Cargo.lock": [await readFile("Cargo.lock", "utf8"), new RegExp(`(^name = "${crate}"\\nversion = ")[^"]+(")`, "m")],
-  // napi bakes the version into the binding version check; `changeset version` does not regenerate index.js.
-  "index.js": [await readFile("index.js", "utf8"), /(bindingPackageVersion !== '|expected )\d+\.\d+\.\d+[^' ]*('| but)/g],
 } as const;
 
 let mismatch = false;
 for (const [file, [content, pattern]] of Object.entries(files)) {
-  if (!pattern.test(content)) throw new Error(`No version found in ${file}`);
+  if (!pattern.test(content)) throw new Error(`No ${crate} version found in ${file}`);
   const updated = content.replace(pattern, `$1${version}$2`);
   if (updated === content) continue;
   if (check) {

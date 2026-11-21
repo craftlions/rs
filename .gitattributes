@@ -2,8 +2,6 @@
 * text=auto eol=lf
 
 # Generated: collapsed in GitHub diffs and excluded from language stats.
-index.js linguist-generated
-index.d.ts linguist-generated
 CHANGELOG.md linguist-generated
 Cargo.lock linguist-generated
 aube-lock.yaml linguist-generated
