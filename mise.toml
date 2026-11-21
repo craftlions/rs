@@ -56,7 +56,7 @@ sources = [
   "build.rs",
   "package.json",
 ]
-outputs = ["pdfium.*.node", "index.js", "index.d.ts"]
+outputs = ["pdfium.*.node", "index.d.ts", "index.js"]
 run = "napi build --platform --release --format esm {% if usage.target %}--target {{usage.target}}{% endif %}"
 
 [tasks.test]
