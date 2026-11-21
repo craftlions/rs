@@ -2,6 +2,8 @@
 node = "26.13.1"
 aube = "2.10.1"
 rust = { version = "1.100.0", profile = "default" }
+jactionlint = "2.6.0"
+shellcheck = "0.11.0"
 
 [settings]
 experimental = true

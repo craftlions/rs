@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  lint:
+    name: Lint and type-check
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # aube-lock.yaml + mise.lock (node/aube versions) fully determine node_modules.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules
+          key: aube-nm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.lock', 'aube-lock.yaml', 'aube-workspace.yaml', 'package.json') }}
+      - uses: $/.github/actions/setup
+      - run: jactionlint
+      - run: cargo fmt --check
+      - run: mise run lint
+      - run: mise run typecheck

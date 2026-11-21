@@ -17,13 +17,14 @@ Make rust crates binding to Node.js use [napi-rs](https://github.com/napi-rs/nap
 
 # DEVELOPMENT
 
-Tools (Node.js, Rust, aube) are pinned in `mise.toml` and locked in `mise.lock`.
+Tools (Node.js, Rust, aube, jactionlint, shellcheck) are pinned in `mise.toml` and locked in `mise.lock`.
 
 ```zsh
 mise install        # install the toolchain (runs `aube install` afterwards)
 mise run build      # build the addon for the host platform
 mise run lint       # clippy, warnings are errors
 mise run typecheck  # tsc (TypeScript 7)
+jactionlint         # lint GitHub Actions workflows
 mise tasks          # list all tasks
 ```
 
