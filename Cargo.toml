@@ -16,3 +16,20 @@ url = "2.5.9"
 
 [build-dependencies]
 napi-build = "2.6.0"
+
+[lints.rust]
+unused_qualifications = "warn"
+rust_2024_compatibility = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Casting rendered pixel sizes from f32 is intentional.
+cast_possible_truncation = "allow"
+# `#[napi]` functions take owned values by design.
+needless_pass_by_value = "allow"
+# "PDFium" is a product name, not a code identifier.
+doc_markdown = "allow"
+
+[lints.cargo]
+unused_dependencies = "warn"
