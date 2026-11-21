@@ -1,11 +1,7 @@
 name: Setup
-description: Install the mise toolchain (node, rust, aube) and Node.js dependencies with aube. Callers own any node_modules cache.
+description: Install the mise toolchain (node, rust, aube) and Node.js dependencies. Callers set MISE_ENV (e.g. ci, or ci,release) on the job and own any extra caches.
 
 inputs:
-  rust-target:
-    description: Additional Rust target to install with rustup
-    required: false
-    default: ""
   cache:
     description: Restore and save the mise tool cache. Set to "false" in release jobs to avoid cache poisoning.
     required: false
@@ -14,17 +10,16 @@ inputs:
 runs:
   using: composite
   steps:
-    # Installs the tools pinned in mise.toml; mise.lock triggers `mise install --locked`.
-    - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
-      with:
-        cache: ${{ inputs.cache }}
-        minimum_release_age: 3d
+    # Re-verify tool provenance on every install and refuse unregistered plugins.
+    # (paranoid's `config` category is left off: it needs content-bound trust of every config file.)
+    - shell: bash
+      run: echo "MISE_PARANOID=plugins,provenance" >> "$GITHUB_ENV"
 
-    - if: ${{ inputs.rust-target != '' }}
-      shell: bash
-      env:
-        RUST_TARGET: ${{ inputs.rust-target }}
-      run: rustup target add "$RUST_TARGET"
+    # Installs the tools pinned in mise.toml (and mise.<env>.toml); mise.lock triggers `mise install --locked`.
+    - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
+      with:
+        version: 2026.11.9
+        cache: ${{ inputs.cache }}
 
     - shell: bash
-      run: aube install --frozen-lockfile
+      run: mise deps install aube

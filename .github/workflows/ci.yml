@@ -19,6 +19,8 @@ defaults:
 jobs:
   lint:
     name: Lint and type-check
+    env:
+      MISE_ENV: ci
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
@@ -57,6 +59,8 @@ jobs:
         run: aube audit --audit-level high
       - name: Fail on deprecated dependencies
         run: aube deprecations --exit-code
+    env:
+      MISE_ENV: ci
       - name: Outdated dependencies (report only)
         run: aube outdated --long || true
       - name: Licenses

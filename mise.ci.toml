@@ -1,0 +1,5 @@
+# Loaded in GitHub Actions via `mise_env: ci` (MISE_ENV=ci).
+
+[env]
+# `aube run` / `aube exec` fail instead of installing when dependencies are out of date.
+AUBE_VERIFY_DEPS_BEFORE_RUN = "error"

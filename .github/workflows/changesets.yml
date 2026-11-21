@@ -12,6 +12,8 @@ permissions: {}
 jobs:
   version:
     name: Version packages
+    env:
+      MISE_ENV: ci
     timeout-minutes: 15
     runs-on: ubuntu-26.04
     permissions:
