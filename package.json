@@ -46,7 +46,6 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "npm",
     "README.md",
     "LICENSE*"
   ],
