@@ -6,17 +6,17 @@ workflows:
     '.github/workflows/changesets.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'changesets/action@ae32849d5ba541f9ae29e40e22a623bc13562f51'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78'
     '.github/workflows/ci.yml':
         - 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9'
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'jdx/jactionlint@72c00452809bcca05b8bc12acdcf15dd7a9c1c5e'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78'
     '.github/workflows/release.yml':
         - 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         - 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
         - 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
-        - 'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d'
+        - 'jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78'
 dependencies:
     'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9':
         ref: 'v6.1.0'
@@ -55,8 +55,8 @@ dependencies:
         repo_id: 1404951382
         uses:
             - 'github/codeql-action@2892aa5e19bbd11bc0cff5427e3b750a04d9e3c2'
-    'jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d':
-        ref: 'v5.2.9'
-        commit: 'sha1-236a21c3b91f5db6d4e174b348674a0f0caac06d'
+    'jdx/mise-action@924e7c586e33d7d4bae9c14e26c5d22e2beb6e78':
+        ref: 'v5.3.0'
+        commit: 'sha1-924e7c586e33d7d4bae9c14e26c5d22e2beb6e78'
         owner_id: 216188
         repo_id: 738284564
