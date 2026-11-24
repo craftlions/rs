@@ -1,5 +1,17 @@
 # @craftlions/pdfium-rs
 
+## 0.1.2
+
+### Patch Changes
+
+- 5f5f9c5: Updates the napi-rs runtime to napi 3.16.3 and napi-derive 3.7.2, which fix how some JavaScript values convert to and from Rust and speed up string conversion and class method calls.
+- e57682f: Uses upstream PDFium version [PDFium 160.0.8179.0](https://github.com/bblanchon/pdfium-binaries/releases/tag/chromium%2F8179).
+  
+  - Sped up mask compositing during page rendering using 16-bit SIMD lanes, processing twice as many pixels per iteration on SSE and AVX2 CPUs (cb73733715a1)
+  - Updated the bundled FreeType font rendering library with 16 upstream commits (96cb92b773d8)
+- 8536596: Updates the pdfium-render crate to 0.9.6. The release only adds new APIs, so rendering is unchanged.
+- 98846ae: Updates the crc32fast crate used for PNG checksums to 1.5.6, along with other Rust dependencies, to their latest patch releases.
+
 ## 0.1.1
 
 ### Patch Changes
