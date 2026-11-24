@@ -60,6 +60,11 @@ jobs:
           path: ~/.cache/jactionlint
           key: jactionlint-online-${{ github.run_id }}-${{ github.run_attempt }}
       - run: mise fmt --check
+      # Offline: mise.lock and mise.release.lock cover every tool, platform and checksum a locked install needs.
+      - run: mise lock --check
+      - run: mise lock --check
+        env:
+          MISE_ENV: ci,release
       - run: cargo fmt --check
       - run: mise run lint
       - run: mise run typecheck

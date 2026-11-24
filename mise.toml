@@ -13,7 +13,9 @@ experimental = true
 lockfile = true
 # Install exactly the versions and download URLs recorded in mise.lock.
 locked = true
-lockfile_platforms = ["macos-arm64", "macos-x64", "linux-x64", "windows-x64"]
+# No macos-x64: no runner or developer uses Intel macOS (x86_64-apple-darwin is cross-compiled on arm64),
+# and aube ships no build for it, which would fail `mise lock --check`.
+lockfile_platforms = ["macos-arm64", "linux-x64", "windows-x64"]
 # Do not install tool versions published less than 3 days ago (supply-chain protection).
 minimum_release_age = "3d"
 
