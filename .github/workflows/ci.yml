@@ -92,6 +92,8 @@ jobs:
           mise-env: ci
       - name: Audit advisories
         run: aube audit --audit-level high
+      - name: Audit mise tools (OSV)
+        run: mise audit
       - name: Fail on deprecated dependencies
         run: aube deprecations --exit-code
       - name: Outdated dependencies (report only)
