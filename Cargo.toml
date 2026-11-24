@@ -9,14 +9,14 @@ license = "MIT"
 crate-type = ["cdylib"]
 
 [dependencies]
-napi = { version = "3.16.2", features = ["napi10"] }
-napi-derive = "3.7.1"
+napi = { version = "3.16.3", features = ["napi10"] }
+napi-derive = "3.7.2"
 pdfium-render = { version = "0.9.5" }
 image = "0.25.10"
 url = "2.5.9"
 
 [build-dependencies]
-napi-build = "2.6.0"
+napi-build = "2.7.0"
 
 [lints.rust]
 unused_qualifications = "warn"
