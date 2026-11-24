@@ -3,3 +3,8 @@
 [env]
 # `aube run` / `aube exec` fail instead of installing when dependencies are out of date.
 AUBE_VERIFY_DEPS_BEFORE_RUN = "error"
+
+[settings]
+# Only these backends may resolve or install tools in CI: core (node, rust), aqua (shellcheck), packslip (aube, jactionlint).
+# CI-only so developers' global tools from other backends (npm:, vfox:, ...) stay active in this repo, e.g. opencode for update-pdfium.
+enable_backends = ["core", "aqua", "packslip"]
