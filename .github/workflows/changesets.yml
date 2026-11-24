@@ -16,8 +16,6 @@ defaults:
 jobs:
   version:
     name: Version packages or tag the release
-    env:
-      MISE_ENV: ci
     timeout-minutes: 15
     runs-on: ubuntu-26.04
     permissions:
@@ -31,6 +29,7 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci
           cache: false
       # With pending changesets: open or update the "Version Packages" PR (mise run version also syncs Cargo.toml).
       # Without (i.e. after that PR is merged): `changeset tag` tags the new version; existing tags are skipped.

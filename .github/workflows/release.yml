@@ -21,8 +21,6 @@ defaults:
 jobs:
   check:
     name: Check release tag
-    env:
-      MISE_ENV: ci
     runs-on: ubuntu-26.04
     timeout-minutes: 10
     cache-mode: none
@@ -34,6 +32,7 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci
           cache: false
       - name: Tag matches package.json and Cargo.toml
         run: |
@@ -47,8 +46,6 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     needs: check
-    env:
-      MISE_ENV: ci,release
     timeout-minutes: 45
     # Releases never restore caches, so a poisoned cache cannot reach published artifacts.
     cache-mode: none
@@ -77,6 +74,7 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci,release
           cache: false
       - run: mise run build "$RUST_TARGET"
         env:
@@ -100,8 +98,6 @@ jobs:
 
   publish:
     name: Publish to npm
-    env:
-      MISE_ENV: ci
     needs: build
     runs-on: ubuntu-26.04
     timeout-minutes: 20
@@ -133,6 +129,7 @@ jobs:
           }
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci
           cache: false
       # Downloads the binaries pinned in pdfium.lock.json and fails on a checksum mismatch.
       - run: mise deps install pdfium
@@ -157,8 +154,6 @@ jobs:
 
   verify:
     name: Verify publish trust evidence
-    env:
-      MISE_ENV: ci
     needs: publish
     runs-on: ubuntu-26.04
     timeout-minutes: 20
@@ -171,6 +166,7 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci
           cache: false
       # Downstream aube/pnpm users reject versions whose trust evidence is weaker than earlier releases.
       # New versions can take several minutes to appear in the npm packument (0.1.0: ~3 minutes), so retry

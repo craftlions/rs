@@ -19,8 +19,6 @@ defaults:
 jobs:
   lint:
     name: Lint and type-check
-    env:
-      MISE_ENV: ci
     runs-on: ubuntu-26.04
     timeout-minutes: 20
     permissions:
@@ -41,6 +39,7 @@ jobs:
           key: aube-nm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.lock', 'aube-lock.yaml', 'aube-workspace.yaml', 'package.json') }}
       - uses: $/.github/actions/setup
         with:
+          mise-env: ci
           cache: false
       - id: jactionlint-bin
         run: echo "path=$(mise which jactionlint)" >> "$GITHUB_OUTPUT"
@@ -71,8 +70,6 @@ jobs:
 
   dependencies:
     name: Dependency checks
-    env:
-      MISE_ENV: ci
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     permissions:
@@ -86,6 +83,8 @@ jobs:
           path: node_modules
           key: aube-nm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.lock', 'aube-lock.yaml', 'aube-workspace.yaml', 'package.json') }}
       - uses: $/.github/actions/setup
+        with:
+          mise-env: ci
       - name: Audit advisories
         run: aube audit --audit-level high
       - name: Fail on deprecated dependencies
